@@ -1,0 +1,6 @@
+{
+  "name": "MonopolyAR.Prototype",
+  "rootNamespace": "MonopolyAR",
+  "references": ["UnityEngine.UI", "Unity.XR.ARFoundation", "Unity.XR.ARSubsystems"],
+  "autoReferenced": true
+}

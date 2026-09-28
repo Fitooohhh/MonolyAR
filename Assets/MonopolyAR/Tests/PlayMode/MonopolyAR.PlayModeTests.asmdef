@@ -1,0 +1,6 @@
+{
+  "name": "MonopolyAR.PlayModeTests",
+  "references": ["MonopolyAR.Prototype", "UnityEngine.UI", "Unity.XR.ARFoundation", "Unity.XR.Management"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}
