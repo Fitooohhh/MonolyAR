@@ -42,6 +42,9 @@ namespace MonopolyAR.Tests
         {
             var placement = Object.FindObjectOfType<ARBoardPlacement>();
             Assert.NotNull(placement);
+            var ui = Object.FindObjectOfType<MonopolyPrototypeUI>();
+            var game = Object.FindObjectOfType<MonopolyTurnManager>();
+            if (ui && ui.IsStartMenuVisible) Assert.IsTrue(ui.StartGame(game.activePlayerCount));
             Assert.IsTrue(Place(placement, new Pose(new Vector3(.3f,.8f,-.6f), Quaternion.Euler(0,37,0))));
             yield return null;
             yield return null;
@@ -96,6 +99,7 @@ namespace MonopolyAR.Tests
             var boardId=game.board.GetInstanceID();
             var diceId=game.dice.GetInstanceID();
             var pose = new Pose(new Vector3(1,.75f,-1),Quaternion.Euler(0,63,0));
+            if (ui.IsStartMenuVisible) Assert.IsTrue(ui.StartGame(game.activePlayerCount));
             Assert.IsTrue(ARTestPlacement.Place(placement,pose));
             yield return null;
             yield return null;
@@ -118,11 +122,16 @@ namespace MonopolyAR.Tests
             for(int i=0;i<40;i++)
             {
                 Assert.AreSame(anchors[i],game.board.GetAnchor(i));
-                Assert.Less(Vector3.Distance(anchors[i].position,pose.position+pose.rotation*(local[i]*(.6f/14))),.00001f);
+                Assert.Less(Vector3.Distance(anchors[i].position,game.board.transform.TransformPoint(local[i])),.00001f);
             }
+            Vector3 towardCamera = Vector3.ProjectOnPlane(placement.arCamera.transform.position - pose.position, pose.rotation * Vector3.up).normalized;
+            Assert.Greater(towardCamera.sqrMagnitude, .99f);
+            Assert.Less(Vector3.Angle(game.board.transform.forward, towardCamera), .001f);
             var oldPosition=game.board.transform.position;
+            var oldRotation=game.board.transform.rotation;
             Assert.IsFalse(ARTestPlacement.Place(placement,new Pose(Vector3.one*99,Quaternion.identity)));
             Assert.AreEqual(oldPosition,game.board.transform.position);
+            Assert.AreEqual(oldRotation,game.board.transform.rotation);
             game.players[0].PlaceAt(game.board,39);
             yield return game.players[0].MoveSteps(game.board,2,.03f);
             CollectionAssert.AreEqual(new[]{0,1},game.players[0].LastVisited);

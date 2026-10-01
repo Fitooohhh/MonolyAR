@@ -12,9 +12,11 @@ namespace MonopolyAR
         public string displayName;
         public Vector2 separation;
         [SerializeField] private int money = StartingMoney;
+        [SerializeField] private int lapsCompleted;
         public int CurrentTile { get; private set; }
         public bool IsMoving { get; private set; }
         public int Money => money;
+        public int LapsCompleted => lapsCompleted;
         public event Action<MonopolyPlayer> PassedStart;
         private readonly List<int> visited = new List<int>();
         public IReadOnlyList<int> LastVisited => visited;
@@ -23,6 +25,8 @@ namespace MonopolyAR
         {
             if (IsMoving) throw new System.InvalidOperationException("No se puede reiniciar el dinero durante el movimiento.");
             money = StartingMoney;
+            lapsCompleted = 0;
+            visited.Clear();
         }
 
         public void PlaceAt(MonopolyBoard board, int index)
@@ -66,6 +70,7 @@ namespace MonopolyAR
                     visited.Add(next);
                     if (previous == MonopolyBoard.TileCount - 1 && next == 0)
                     {
+                        lapsCompleted++;
                         money += StartBonus;
                         PassedStart?.Invoke(this);
                     }

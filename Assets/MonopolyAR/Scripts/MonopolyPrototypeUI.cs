@@ -14,6 +14,10 @@ namespace MonopolyAR
         public Button EndTurnButton { get; private set; }
         public Text StatusText { get; private set; }
         public Text ResultsText { get; private set; }
+        public Button[] PlayerCountButtons { get; private set; }
+        public Button PlayButton { get; private set; }
+        public bool IsStartMenuVisible => menuVisible;
+        public int SelectedPlayerCount => selectedPlayerCount;
         public bool ShowTileNumbers { get; private set; } = true;
         private RectTransform safeRoot;
         private RectTransform numberLayer;
@@ -26,6 +30,9 @@ namespace MonopolyAR
         private int lastWidth, lastHeight;
         private Rect lastSafeArea;
         private float lastScaleFactor;
+        private GameObject startMenu;
+        private bool menuVisible = true;
+        private int selectedPlayerCount = 2;
 
 
         private bool landscape;
@@ -86,8 +93,8 @@ namespace MonopolyAR
                 placementText.rectTransform.anchorMin = new Vector2(.28f, 0);
                 placementText.rectTransform.anchorMax = new Vector2(.98f, .16f);
             }
-            if (game && game.players != null)
-                foreach (var player in game.players)
+            if (game && game.ConfiguredPlayers != null)
+                foreach (var player in game.ConfiguredPlayers)
                     if (player) player.PassedStart += OnPlayerPassedStart;
             if (!FindObjectOfType<EventSystem>()) new GameObject("PrototypeEventSystem", typeof(EventSystem), typeof(StandaloneInputModule)).transform.SetParent(transform, false);
             numbers = new Text[MonopolyBoard.TileCount];
@@ -99,11 +106,82 @@ namespace MonopolyAR
                 numbers[i].rectTransform.anchorMin = numbers[i].rectTransform.anchorMax = new Vector2(.5f, .5f);
                 numbers[i].rectTransform.sizeDelta = new Vector2(38, 28);
             }
+            BuildStartMenu(canvasObject.transform);
+        }
+
+        private void BuildStartMenu(Transform canvasParent)
+        {
+            startMenu = new GameObject("StartMenu", typeof(RectTransform), typeof(Image));
+            startMenu.transform.SetParent(canvasParent, false);
+            var root = startMenu.GetComponent<RectTransform>();
+            SetRect(root, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            startMenu.GetComponent<Image>().color = new Color(.12f, .14f, .18f, .97f);
+
+            var title = Label("Title", startMenu.transform, 44, TextAnchor.MiddleCenter);
+            SetRect(title.rectTransform, new Vector2(.12f, .70f), new Vector2(.88f, .84f), Vector2.zero, Vector2.zero);
+            title.text = "MONOPOLY AR";
+            title.color = Color.white;
+
+            var subtitle = Label("Subtitle", startMenu.transform, 24, TextAnchor.MiddleCenter);
+            SetRect(subtitle.rectTransform, new Vector2(.12f, .62f), new Vector2(.88f, .70f), Vector2.zero, Vector2.zero);
+            subtitle.text = "Selecciona el número de jugadores";
+            subtitle.color = new Color(.9f, .9f, .9f, 1);
+
+            PlayerCountButtons = new Button[3];
+            for (int i = 0; i < PlayerCountButtons.Length; i++)
+            {
+                int count = i + 2;
+                var button = Button("Players" + count, count + " JUGADORES", startMenu.transform,
+                    new Vector2(.28f, .51f - i * .09f), new Vector2(.72f, .58f - i * .09f), new Color(.8f, .8f, .8f, 1));
+                PlayerCountButtons[i] = button;
+                button.onClick.AddListener(() => SelectPlayerCount(count));
+            }
+
+            PlayButton = Button("Play", "JUGAR", startMenu.transform,
+                new Vector2(.34f, .19f), new Vector2(.66f, .29f), new Color(.3f, .75f, .4f, 1));
+            PlayButton.onClick.AddListener(() => StartGame(selectedPlayerCount));
+            SelectPlayerCount(selectedPlayerCount);
+        }
+
+        public void SelectPlayerCount(int count)
+        {
+            if (count < 2 || count > 4) return;
+            selectedPlayerCount = count;
+            if (PlayerCountButtons == null) return;
+            for (int i = 0; i < PlayerCountButtons.Length; i++)
+            {
+                bool selected = i + 2 == count;
+                var button = PlayerCountButtons[i];
+                button.image.color = selected ? new Color(.25f, .55f, .85f, 1) : new Color(.8f, .8f, .8f, 1);
+                var label = button.transform.Find("Label")?.GetComponent<Text>();
+                if (label) { label.text = (selected ? "✓ " : string.Empty) + (i + 2) + " JUGADORES"; label.color = selected ? Color.white : Color.black; }
+            }
+        }
+
+        /// <summary>Confirma la selección del menú y deja que AR coloque el tablero.</summary>
+        public bool StartGame(int count)
+        {
+            if (!menuVisible || !game || count < 2 || count > 4 || !game.ConfigurePlayers(count)) return false;
+            selectedPlayerCount = count;
+            menuVisible = false;
+            if (startMenu) startMenu.SetActive(false);
+            if (safeRoot) safeRoot.gameObject.SetActive(true);
+            return true;
         }
 
         private void LateUpdate()
         {
             if (!safeRoot || !game) return;
+            if (menuVisible)
+            {
+                safeRoot.gameObject.SetActive(false);
+                numberLayer.gameObject.SetActive(false);
+                if (placementText) placementText.gameObject.SetActive(false);
+                RollButton.interactable = false;
+                EndTurnButton.interactable = false;
+                return;
+            }
+            safeRoot.gameObject.SetActive(true);
             Rect safe = Screen.safeArea;
             safeRoot.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
             safeRoot.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
@@ -136,7 +214,7 @@ namespace MonopolyAR
             }
             numberLayer.gameObject.SetActive(placed && ShowTileNumbers);
             bool ready = game.Phase != TurnPhase.NotReady && game.Phase != TurnPhase.Error;
-            StatusText.text = !placed ? "Jugador: Empresario\nCasilla: 00\nDinero: $1500" : ready ? $"Jugador: {game.ActivePlayer.displayName}\nCasilla: {game.ActivePlayer.CurrentTile:00}\nDinero: ${game.ActivePlayer.Money}" : (game.Phase == TurnPhase.Error ? game.ErrorMessage : "Preparando partida...");
+            StatusText.text = !placed ? "Jugador: Empresario\nCasilla: 00\nVuelta: 0\nDinero: $1500" : ready ? $"Jugador: {game.ActivePlayer.displayName}\nCasilla: {game.ActivePlayer.CurrentTile:00}\nVuelta: {game.ActivePlayer.LapsCompleted}\nDinero: ${game.ActivePlayer.Money}" : (game.Phase == TurnPhase.Error ? game.ErrorMessage : "Preparando partida...");
             ResultsText.text = game.dice.HasResult ? $"Dado 1: {game.dice.DieOne}\nDado 2: {game.dice.DieTwo}\nTotal: {game.dice.Sum}" : "Dado 1: -\nDado 2: -\nTotal: -";
             RollButton.interactable = placed && game.CanRoll;
             EndTurnButton.interactable = placed && game.CanEndTurn;
@@ -159,8 +237,8 @@ namespace MonopolyAR
 
         private void OnDestroy()
         {
-            if (game && game.players != null)
-                foreach (var player in game.players)
+            if (game && game.ConfiguredPlayers != null)
+                foreach (var player in game.ConfiguredPlayers)
                     if (player) player.PassedStart -= OnPlayerPassedStart;
         }
 

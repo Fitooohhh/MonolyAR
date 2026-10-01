@@ -33,7 +33,7 @@ namespace MonopolyAR.Tests
         [UnityTest]
         public IEnumerator InitialTextsAndCheckboxControlThe40Numbers()
         {
-            Assert.AreEqual("Jugador: Empresario\nCasilla: 00\nDinero: $1500", ui.StatusText.text);
+            Assert.AreEqual("Jugador: Empresario\nCasilla: 00\nVuelta: 0\nDinero: $1500", ui.StatusText.text);
             Assert.AreEqual("Dado 1: -\nDado 2: -\nTotal: -", ui.ResultsText.text);
             var canvas = ui.GetComponentInChildren<Canvas>();
             var panel = canvas.transform.Find("SafeArea/StatusPanel");
@@ -87,13 +87,13 @@ namespace MonopolyAR.Tests
             Assert.IsTrue(moved);
             yield return null;
             Assert.AreEqual($"Dado 1: {game.dice.DieOne}\nDado 2: {game.dice.DieTwo}\nTotal: {game.dice.Sum}", ui.ResultsText.text);
-            Assert.AreEqual($"Jugador: Empresario\nCasilla: {game.players[0].CurrentTile:00}\nDinero: $1500", ui.StatusText.text);
+            Assert.AreEqual($"Jugador: Empresario\nCasilla: {game.players[0].CurrentTile:00}\nVuelta: {game.players[0].LapsCompleted}\nDinero: $1500", ui.StatusText.text);
             Assert.AreEqual(game.dice.Sum, game.players[0].CurrentTile);
             CollectionAssert.AreEqual(Enumerable.Range(1, game.dice.Sum), game.players[0].LastVisited);
             Assert.IsTrue(ui.EndTurnButton.interactable);
             ui.EndTurnButton.onClick.Invoke();
             yield return null;
-            Assert.AreEqual("Jugador: Empresaria\nCasilla: 00\nDinero: $1500", ui.StatusText.text);
+            Assert.AreEqual("Jugador: Empresaria\nCasilla: 00\nVuelta: 0\nDinero: $1500", ui.StatusText.text);
             Assert.AreEqual("Dado 1: -\nDado 2: -\nTotal: -", ui.ResultsText.text);
             Assert.IsTrue(ui.RollButton.interactable);
             Assert.IsFalse(ui.EndTurnButton.interactable);

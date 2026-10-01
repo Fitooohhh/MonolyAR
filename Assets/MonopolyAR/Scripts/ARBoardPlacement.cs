@@ -19,6 +19,8 @@ namespace MonopolyAR
         public Transform indicator;
         public float boardWidthMeters = .6f;
         public float originalBoardWidth = 14f;
+        [Tooltip("Frente legible del modelo en el espacio local de BoardRoot. El tablero actual usa +Z.")]
+        public Vector3 modelFrontLocal = Vector3.forward;
         public bool BoardPlaced { get; private set; }
         public string PlacementMessage { get; private set; } = "Busca una superficie y toca para colocar el tablero";
         private Quaternion baseRotation;
@@ -127,7 +129,7 @@ namespace MonopolyAR
         {
             if (BoardPlaced) return false;
             boardRoot.SetParent(anchor, true);
-            boardRoot.SetPositionAndRotation(pose.position, pose.rotation * baseRotation);
+            boardRoot.SetPositionAndRotation(pose.position, CalculatePlacementRotation(pose));
             boardRoot.localScale = baseScale * (boardWidthMeters / originalBoardWidth);
             boardRoot.gameObject.SetActive(true);
             BoardPlaced = true;
@@ -137,6 +139,20 @@ namespace MonopolyAR
             planeManager.requestedDetectionMode = PlaneDetectionMode.None;
             game.enabled = true;
             return true;
+        }
+
+        /// <summary>Calcula una sola orientación horizontal hacia la posición inicial de la cámara.</summary>
+        public Quaternion CalculatePlacementRotation(Pose pose)
+        {
+            Vector3 surfaceUp = pose.rotation * Vector3.up;
+            Vector3 towardCamera = Vector3.ProjectOnPlane(arCamera.transform.position - pose.position, surfaceUp);
+            if (towardCamera.sqrMagnitude < 0.0001f)
+                return pose.rotation * baseRotation;
+            towardCamera.Normalize();
+            Quaternion desiredBasis = Quaternion.LookRotation(towardCamera, surfaceUp);
+            Vector3 front = modelFrontLocal.sqrMagnitude < 0.0001f ? Vector3.forward : modelFrontLocal.normalized;
+            Quaternion modelBasis = Quaternion.LookRotation(front, Vector3.up);
+            return desiredBasis * Quaternion.Inverse(modelBasis) * baseRotation;
         }
     }
 }
