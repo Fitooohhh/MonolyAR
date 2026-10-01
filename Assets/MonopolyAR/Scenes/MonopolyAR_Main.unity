@@ -243,6 +243,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Empresario
   separation: {x: -0.25, y: 0}
+  money: 1500
 --- !u!1001 &76287492
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -540,6 +541,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Empresaria
   separation: {x: 0.25, y: 0}
+  money: 1500
 --- !u!4 &166028294
 Transform:
   m_ObjectHideFlags: 0

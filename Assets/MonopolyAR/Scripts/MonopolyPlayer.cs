@@ -1,17 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace MonopolyAR
 {
     public sealed class MonopolyPlayer : MonoBehaviour
     {
+        public const int StartingMoney = 1500;
+        public const int StartBonus = 200;
         public string displayName;
         public Vector2 separation;
+        [SerializeField] private int money = StartingMoney;
         public int CurrentTile { get; private set; }
         public bool IsMoving { get; private set; }
+        public int Money => money;
+        public event Action<MonopolyPlayer> PassedStart;
         private readonly List<int> visited = new List<int>();
         public IReadOnlyList<int> LastVisited => visited;
+
+        public void ResetForNewGame()
+        {
+            if (IsMoving) throw new System.InvalidOperationException("No se puede reiniciar el dinero durante el movimiento.");
+            money = StartingMoney;
+        }
 
         public void PlaceAt(MonopolyBoard board, int index)
         {
@@ -36,6 +48,7 @@ namespace MonopolyAR
             {
                 for (int step = 0; step < steps; step++)
                 {
+                    int previous = CurrentTile;
                     int next = MonopolyBoard.NextIndex(CurrentTile);
                     Vector3 start = transform.position;
                     Vector3 target = board.PositionFor(next, separation);
@@ -51,6 +64,11 @@ namespace MonopolyAR
                     transform.position = board.PositionFor(next, separation);
                     CurrentTile = next;
                     visited.Add(next);
+                    if (previous == MonopolyBoard.TileCount - 1 && next == 0)
+                    {
+                        money += StartBonus;
+                        PassedStart?.Invoke(this);
+                    }
                 }
             }
             finally

@@ -39,6 +39,7 @@ namespace MonopolyAR.Tests
             foreach (var p in game.players)
             {
                 Assert.AreEqual(0, p.CurrentTile);
+                Assert.AreEqual(MonopolyPlayer.StartingMoney, p.Money);
                 Assert.Less(Vector3.Distance(p.transform.position, game.board.PositionFor(0, p.separation)), .001f);
                 AssertStatic(p);
             }

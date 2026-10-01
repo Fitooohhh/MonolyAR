@@ -29,6 +29,7 @@ namespace MonopolyAR
                 {
                     if (!player) throw new System.InvalidOperationException("Falta un jugador.");
                     player.Validate();
+                    player.ResetForNewGame();
                     player.PlaceAt(board, 0);
                 }
                 if (!dice.dieOneVisual || !dice.dieTwoVisual) throw new System.InvalidOperationException("Faltan los modelos de dados.");

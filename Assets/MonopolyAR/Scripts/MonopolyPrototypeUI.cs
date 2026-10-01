@@ -20,6 +20,8 @@ namespace MonopolyAR
         private Text[] numbers;
         private Font font;
         public Toggle NumbersToggle { get; private set; }
+        private string transientMessage;
+        private float transientMessageUntil;
         private Canvas uiCanvas;
         private int lastWidth, lastHeight;
         private Rect lastSafeArea;
@@ -47,18 +49,18 @@ namespace MonopolyAR
             Place(panel, 12, 12, 304, 372);
             panel.gameObject.AddComponent<Image>().color = new Color(.22f, .22f, .22f, 1);
             StatusText = Label("Player", panel, 22, TextAnchor.UpperLeft);
-            Place(StatusText.rectTransform, 16, 16, 272, 56);
+            Place(StatusText.rectTransform, 16, 16, 272, 84);
             ResultsText = Label("DiceResults", panel, 22, TextAnchor.UpperLeft);
-            Place(ResultsText.rectTransform, 16, 88, 272, 84);
+            Place(ResultsText.rectTransform, 16, 112, 272, 84);
             var buttonGray = new Color(.8f, .8f, .8f, 1);
             RollButton = Button("RollDice", "Lanzar dados", panel, Vector2.zero, Vector2.one, buttonGray);
-            Place(RollButton.GetComponent<RectTransform>(), 16, 192, 272, 48);
+            Place(RollButton.GetComponent<RectTransform>(), 16, 208, 272, 48);
             EndTurnButton = Button("EndTurn", "Finalizar turno", panel, Vector2.zero, Vector2.one, buttonGray);
-            Place(EndTurnButton.GetComponent<RectTransform>(), 16, 252, 272, 48);
+            Place(EndTurnButton.GetComponent<RectTransform>(), 16, 268, 272, 48);
             RollButton.onClick.AddListener(() => { if (!arPlacement || arPlacement.BoardPlaced) game.TryRoll(); });
             EndTurnButton.onClick.AddListener(() => { if (!arPlacement || arPlacement.BoardPlaced) game.TryEndTurn(); });
             var toggleRect = Rect("ToggleNumbers", panel, Vector2.zero, Vector2.one);
-            Place(toggleRect, 16, 322, 272, 32);
+            Place(toggleRect, 16, 328, 272, 32);
             NumbersToggle = toggleRect.gameObject.AddComponent<Toggle>();
             var box = Rect("Background", toggleRect, Vector2.zero, Vector2.one);
             Place(box, 0, 2, 28, 28);
@@ -84,6 +86,9 @@ namespace MonopolyAR
                 placementText.rectTransform.anchorMin = new Vector2(.28f, 0);
                 placementText.rectTransform.anchorMax = new Vector2(.98f, .16f);
             }
+            if (game && game.players != null)
+                foreach (var player in game.players)
+                    if (player) player.PassedStart += OnPlayerPassedStart;
             if (!FindObjectOfType<EventSystem>()) new GameObject("PrototypeEventSystem", typeof(EventSystem), typeof(StandaloneInputModule)).transform.SetParent(transform, false);
             numbers = new Text[MonopolyBoard.TileCount];
             for (int i = 0; i < numbers.Length; i++)
@@ -123,10 +128,15 @@ namespace MonopolyAR
                 FitBoardToCamera();
             }
             bool placed = !arPlacement || arPlacement.BoardPlaced;
-            if (placementText) { placementText.text = arPlacement.PlacementMessage; placementText.gameObject.SetActive(!placed); }
+            if (placementText)
+            {
+                bool showTransient = placed && Time.unscaledTime < transientMessageUntil;
+                placementText.text = !placed ? arPlacement.PlacementMessage : (showTransient ? transientMessage : string.Empty);
+                placementText.gameObject.SetActive(!placed || showTransient);
+            }
             numberLayer.gameObject.SetActive(placed && ShowTileNumbers);
             bool ready = game.Phase != TurnPhase.NotReady && game.Phase != TurnPhase.Error;
-            StatusText.text = !placed ? "Jugador: Empresario\nCasilla: 00" : ready ? $"Jugador: {game.ActivePlayer.displayName}\nCasilla: {game.ActivePlayer.CurrentTile:00}" : (game.Phase == TurnPhase.Error ? game.ErrorMessage : "Preparando partida...");
+            StatusText.text = !placed ? "Jugador: Empresario\nCasilla: 00\nDinero: $1500" : ready ? $"Jugador: {game.ActivePlayer.displayName}\nCasilla: {game.ActivePlayer.CurrentTile:00}\nDinero: ${game.ActivePlayer.Money}" : (game.Phase == TurnPhase.Error ? game.ErrorMessage : "Preparando partida...");
             ResultsText.text = game.dice.HasResult ? $"Dado 1: {game.dice.DieOne}\nDado 2: {game.dice.DieTwo}\nTotal: {game.dice.Sum}" : "Dado 1: -\nDado 2: -\nTotal: -";
             RollButton.interactable = placed && game.CanRoll;
             EndTurnButton.interactable = placed && game.CanEndTurn;
@@ -139,6 +149,19 @@ namespace MonopolyAR
                     RectTransformUtility.ScreenPointToLocalPointInRectangle(numberLayer, screen, null, out Vector2 local);
                     numbers[i].rectTransform.anchoredPosition = local;
                 }
+        }
+
+        private void OnPlayerPassedStart(MonopolyPlayer player)
+        {
+            transientMessage = $"{player.displayName} recibió ${MonopolyPlayer.StartBonus} por pasar por SALIDA";
+            transientMessageUntil = Time.unscaledTime + 2.5f;
+        }
+
+        private void OnDestroy()
+        {
+            if (game && game.players != null)
+                foreach (var player in game.players)
+                    if (player) player.PassedStart -= OnPlayerPassedStart;
         }
 
         private void FitBoardToCamera()
