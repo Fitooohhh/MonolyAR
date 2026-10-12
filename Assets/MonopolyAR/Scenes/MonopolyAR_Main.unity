@@ -3051,6 +3051,7 @@ MonoBehaviour:
   game: {fileID: 1881163606}
   boardCamera: {fileID: 178445447}
   arPlacement: {fileID: 386215011}
+  propertyCard: {fileID: 0}
 --- !u!114 &1881163606
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3139,6 +3140,85 @@ Transform:
   - {fileID: 465426287}
   m_Father: {fileID: 2051597328}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1984269050
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2051597328}
+    m_Modifications:
+    - target: {fileID: 2212018563989697202, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_Name
+      value: PropertyCard3D
+      objectReference: {fileID: 0}
+    - target: {fileID: 2212018563989697202, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9b0ba9481a3509a48b6feb945471959c, type: 3}
+--- !u!4 &1984269051 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4178142820490850527, guid: 9b0ba9481a3509a48b6feb945471959c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1984269050}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2012835475
 GameObject:
   m_ObjectHideFlags: 0
@@ -3207,6 +3287,7 @@ Transform:
   - {fileID: 887142371}
   - {fileID: 2012835476}
   - {fileID: 1885482166}
+  - {fileID: 1984269051}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2051597329
@@ -3303,6 +3384,527 @@ MonoBehaviour:
   - {fileID: 887142374}
   - {fileID: 887142373}
   - {fileID: 887142372}
+  spaces:
+  - index: 0
+    displayName: SALIDA
+    type: 0
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 1
+    displayName: Propiedad 01
+    type: 1
+    colorGroup: 1
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 2
+    displayName: Comunidad
+    type: 2
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 3
+    displayName: Propiedad 03
+    type: 1
+    colorGroup: 1
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 4
+    displayName: Impuesto
+    type: 3
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 5
+    displayName: "Estaci\xF3n 1"
+    type: 4
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 6
+    displayName: Propiedad 06
+    type: 1
+    colorGroup: 2
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 7
+    displayName: Suerte
+    type: 5
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 8
+    displayName: Propiedad 08
+    type: 1
+    colorGroup: 2
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 9
+    displayName: Propiedad 09
+    type: 1
+    colorGroup: 2
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 10
+    displayName: "C\xE1rcel / Visita"
+    type: 6
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 11
+    displayName: Propiedad 11
+    type: 1
+    colorGroup: 3
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 12
+    displayName: Electricidad
+    type: 7
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 13
+    displayName: Propiedad 13
+    type: 1
+    colorGroup: 3
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 14
+    displayName: Propiedad 14
+    type: 1
+    colorGroup: 3
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 15
+    displayName: "Estaci\xF3n 2"
+    type: 4
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 16
+    displayName: Propiedad 16
+    type: 1
+    colorGroup: 4
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 17
+    displayName: Comunidad
+    type: 2
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 18
+    displayName: Propiedad 18
+    type: 1
+    colorGroup: 4
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 19
+    displayName: Propiedad 19
+    type: 1
+    colorGroup: 4
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 20
+    displayName: Parking
+    type: 8
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 21
+    displayName: Propiedad 21
+    type: 1
+    colorGroup: 5
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 22
+    displayName: Suerte
+    type: 5
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 23
+    displayName: Propiedad 23
+    type: 1
+    colorGroup: 5
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 24
+    displayName: Propiedad 24
+    type: 1
+    colorGroup: 5
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 25
+    displayName: "Estaci\xF3n 3"
+    type: 4
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 26
+    displayName: Propiedad 26
+    type: 1
+    colorGroup: 6
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 27
+    displayName: Propiedad 27
+    type: 1
+    colorGroup: 6
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 28
+    displayName: Agua
+    type: 7
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 29
+    displayName: Propiedad 29
+    type: 1
+    colorGroup: 6
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 30
+    displayName: "Ir a la C\xE1rcel"
+    type: 9
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 31
+    displayName: Propiedad 31
+    type: 1
+    colorGroup: 7
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 32
+    displayName: Propiedad 32
+    type: 1
+    colorGroup: 7
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 33
+    displayName: Comunidad
+    type: 2
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 34
+    displayName: Propiedad 34
+    type: 1
+    colorGroup: 7
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 35
+    displayName: "Estaci\xF3n 4"
+    type: 4
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 36
+    displayName: Suerte
+    type: 5
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 37
+    displayName: Propiedad 37
+    type: 1
+    colorGroup: 8
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 38
+    displayName: Impuesto
+    type: 3
+    colorGroup: 0
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
+  - index: 39
+    displayName: Propiedad 39
+    type: 1
+    colorGroup: 8
+    purchasePrice: 0
+    baseRent: 0
+    rent1House: 0
+    rent2Houses: 0
+    rent3Houses: 0
+    rent4Houses: 0
+    rentHotel: 0
+    housePrice: 0
+    hotelPrice: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -3315,3 +3917,7 @@ SceneRoots:
   - {fileID: 294414163}
   - {fileID: 386215016}
   - {fileID: 1702471799}
+
+
+
+

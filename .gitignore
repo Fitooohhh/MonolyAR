@@ -26,3 +26,7 @@ Recordings/
 
 .DS_Store
 Thumbs.db
+
+# Compilaciones Android
+*.apk
+*.aab

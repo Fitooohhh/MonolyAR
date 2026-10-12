@@ -8,11 +8,13 @@ namespace MonopolyAR
         public Transform dieOneVisual;
         public Transform dieTwoVisual;
         [Min(0.1f)] public float rollSeconds = 0.7f;
+        [Min(0f)] public float surfaceClearance = 0.015f;
         public int DieOne { get; private set; }
         public int DieTwo { get; private set; }
         public int Sum => DieOne + DieTwo;
         public bool HasResult => DieOne > 0 && DieTwo > 0;
         public bool IsRolling { get; private set; }
+        public float SurfaceClearance => surfaceClearance;
 
         public static Vector2Int GenerateRoll() => new Vector2Int(Random.Range(1, 7), Random.Range(1, 7));
         public void ClearResult() { DieOne = 0; DieTwo = 0; }
@@ -114,6 +116,37 @@ namespace MonopolyAR
                 * Quaternion.Euler(spin * normalized);
         }
 
+        private void SettleDieOnBoard(Transform die)
+        {
+            if (!die) return;
+            MonopolyBoard board = GetComponentInParent<MonopolyBoard>();
+            if (!board) return;
+            Transform anchor = board.GetAnchor(0);
+            if (!anchor) return;
+            var renderers = die.GetComponentsInChildren<Renderer>(true);
+            Vector3 up = board.transform.up.normalized;
+            bool hasBounds = false;
+            float minimum = 0f;
+            foreach (var renderer in renderers)
+            {
+                if (!renderer || !renderer.enabled || renderer.bounds.size.sqrMagnitude <= 0.000001f) continue;
+                Bounds bounds = renderer.bounds;
+                float projectedExtent = Vector3.Dot(new Vector3(Mathf.Abs(up.x), Mathf.Abs(up.y), Mathf.Abs(up.z)), bounds.extents);
+                float candidate = Vector3.Dot(bounds.center, up) - projectedExtent;
+                if (!hasBounds || candidate < minimum) minimum = candidate;
+                hasBounds = true;
+            }
+            if (!hasBounds) return;
+            float surface = Vector3.Dot(anchor.position, up);
+            // The value is authored in board-local units so the margin scales
+            // with the AR placement instead of becoming an oversized world
+            // gap when BoardRoot is reduced for the phone.
+            float worldClearance = surfaceClearance * board.transform.TransformVector(Vector3.up).magnitude;
+            float shift = surface + worldClearance - minimum;
+            if (float.IsNaN(shift) || float.IsInfinity(shift)) return;
+            if (shift > 0f) die.position += up * shift;
+        }
+
         public IEnumerator Roll()
         {
             if (IsRolling || !dieOneVisual || !dieTwoVisual) throw new System.InvalidOperationException("Dados no disponibles.");
@@ -141,6 +174,8 @@ namespace MonopolyAR
                 dieTwoVisual.localPosition = bPosition;
                 dieOneVisual.localRotation = aFinalRotation;
                 dieTwoVisual.localRotation = bFinalRotation;
+                SettleDieOnBoard(dieOneVisual);
+                SettleDieOnBoard(dieTwoVisual);
                 DieOne = result.x;
                 DieTwo = result.y;
                 completed = true;

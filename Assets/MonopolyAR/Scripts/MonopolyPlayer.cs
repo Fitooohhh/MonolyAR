@@ -18,6 +18,7 @@ namespace MonopolyAR
         public int Money => money;
         public int LapsCompleted => lapsCompleted;
         public event Action<MonopolyPlayer> PassedStart;
+        public event Action<MonopolyPlayer, MonopolySpaceData> ArrivedAtSpace;
         private readonly List<int> visited = new List<int>();
         public IReadOnlyList<int> LastVisited => visited;
 
@@ -75,6 +76,7 @@ namespace MonopolyAR
                         PassedStart?.Invoke(this);
                     }
                 }
+                ArrivedAtSpace?.Invoke(this, board.GetSpaceData(CurrentTile));
             }
             finally
             {

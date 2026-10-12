@@ -99,6 +99,13 @@ namespace MonopolyAR.Tests
             Assert.Less(Vector3.Distance(game.players[0].transform.position, game.board.PositionFor(sum, game.players[0].separation)), .001f);
             yield return null;
             AssertStatic(game.players[0]);
+            var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
+            if (propertyCard && propertyCard.IsOpen)
+            {
+                Assert.IsFalse(ui.EndTurnButton.interactable);
+                propertyCard.Hide();
+                yield return null;
+            }
             Assert.IsTrue(ui.EndTurnButton.interactable);
             Assert.IsFalse(ui.RollButton.interactable);
             Assert.IsFalse(game.TryRoll());

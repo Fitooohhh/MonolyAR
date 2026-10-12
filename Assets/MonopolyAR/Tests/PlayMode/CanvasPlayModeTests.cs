@@ -38,7 +38,7 @@ namespace MonopolyAR.Tests
             var canvas = ui.GetComponentInChildren<Canvas>();
             var panel = canvas.transform.Find("SafeArea/StatusPanel");
             var layer = canvas.transform.Find("TileNumbers").gameObject;
-            Assert.AreEqual(1, panel.parent.childCount, "Only one control panel");
+            Assert.AreEqual(2, panel.parent.childCount, "Status panel plus the safe card close button");
             Assert.AreEqual(40, layer.transform.childCount);
             Assert.IsEmpty(panel.GetComponentsInChildren<Shadow>(true));
             Assert.AreEqual(ui.RollButton.image.color, ui.EndTurnButton.image.color);
@@ -90,6 +90,13 @@ namespace MonopolyAR.Tests
             Assert.AreEqual($"Jugador: Empresario\nCasilla: {game.players[0].CurrentTile:00}\nVuelta: {game.players[0].LapsCompleted}\nDinero: $1500", ui.StatusText.text);
             Assert.AreEqual(game.dice.Sum, game.players[0].CurrentTile);
             CollectionAssert.AreEqual(Enumerable.Range(1, game.dice.Sum), game.players[0].LastVisited);
+            var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
+            if (propertyCard && propertyCard.IsOpen)
+            {
+                Assert.IsFalse(ui.EndTurnButton.interactable);
+                propertyCard.Hide();
+                yield return null;
+            }
             Assert.IsTrue(ui.EndTurnButton.interactable);
             ui.EndTurnButton.onClick.Invoke();
             yield return null;
@@ -224,6 +231,8 @@ namespace MonopolyAR.Tests
                 }
                 Assert.AreEqual(expectedTile, player.CurrentTile);
                 Assert.AreEqual(beforeMoney + crossings * MonopolyPlayer.StartBonus, player.Money);
+                var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
+                if (propertyCard && propertyCard.IsOpen) propertyCard.Hide();
                 ui.EndTurnButton.onClick.Invoke();
                 yield return null;
             }
@@ -263,6 +272,8 @@ namespace MonopolyAR.Tests
                     int expectedTile = beforeTile;
                     for (int step = 0; step < game.dice.Sum; step++) expectedTile = MonopolyBoard.NextIndex(expectedTile);
                     Assert.AreEqual(expectedTile, player.CurrentTile);
+                    var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
+                    if (propertyCard && propertyCard.IsOpen) propertyCard.Hide();
                     ui.EndTurnButton.onClick.Invoke();
                     yield return null;
                 }

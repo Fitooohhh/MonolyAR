@@ -35,6 +35,14 @@ namespace MonopolyAR.Tests
         // Inject only the measured pose in tests. Real device input still requires a raycast and AR anchor.
         internal static bool Place(ARBoardPlacement placement, Pose pose)
         {
+            // Reproduce una cámara física que realmente observa el punto tocado.
+            // La cámara de XR Simulation queda en el origen entre pruebas y puede
+            // dejar un tablero inyectado por reflexión detrás de su viewport.
+            Vector3 cameraPosition = pose.position + pose.rotation * new Vector3(0f, .45f, -.65f);
+            foreach (Behaviour behaviour in placement.arCamera.GetComponents<Behaviour>())
+                if (behaviour.GetType().Name.Contains("TrackedPoseDriver")) behaviour.enabled = false;
+            placement.arCamera.transform.SetPositionAndRotation(cameraPosition,
+                Quaternion.LookRotation(pose.position - cameraPosition, pose.rotation * Vector3.up));
             return (bool)typeof(ARBoardPlacement).GetMethod("PlaceBoard", BindingFlags.NonPublic | BindingFlags.Instance)
                 .Invoke(placement, new object[] { pose, null });
         }

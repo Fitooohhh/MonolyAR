@@ -9,7 +9,9 @@ namespace MonopolyAR
         public const int TileCount = 40;
         [SerializeField] private Transform[] anchors = new Transform[TileCount];
         [SerializeField] private Transform[] tiles = new Transform[TileCount];
+        [SerializeField] private MonopolySpaceData[] spaces = new MonopolySpaceData[TileCount];
         public Transform[] Anchors => (Transform[])anchors.Clone();
+        public MonopolySpaceData[] Spaces => (MonopolySpaceData[])spaces.Clone();
 
         // Index is defined by the original names, never by hierarchy order or coordinates.
         public void RegisterOriginalAnchors()
@@ -23,17 +25,42 @@ namespace MonopolyAR
                 anchors[i] = children.Single(t => t.name == name + "_Anchor");
                 tiles[i] = children.Single(t => t.name == name);
             }
+            EnsureSpaceData();
             Validate();
         }
 
         public void Validate()
         {
+            EnsureSpaceData();
             if (anchors.Length != TileCount || tiles.Length != TileCount)
                 throw new InvalidOperationException("Se requieren las 40 casillas y anclajes originales.");
             for (int i = 0; i < TileCount; i++)
                 if (!anchors[i] || !tiles[i] || !anchors[i].IsChildOf(transform) ||
                     !tiles[i].IsChildOf(transform) || anchors[i].name != $"Tile_{i:00}_Anchor" || tiles[i].name != $"Tile_{i:00}")
                     throw new InvalidOperationException($"Referencia original inválida en casilla {i}.");
+        }
+
+        public MonopolySpaceData GetSpaceData(int index)
+        {
+            if (index < 0 || index >= TileCount) throw new ArgumentOutOfRangeException(nameof(index));
+            EnsureSpaceData();
+            return spaces[index];
+        }
+
+        public void EnsureSpaceData()
+        {
+            if (spaces == null || spaces.Length != TileCount)
+            {
+                spaces = MonopolySpaceDataCatalog.CreateDefault();
+                return;
+            }
+
+            for (int i = 0; i < TileCount; i++)
+                if (spaces[i].index != i || string.IsNullOrEmpty(spaces[i].displayName))
+                {
+                    spaces = MonopolySpaceDataCatalog.CreateDefault();
+                    return;
+                }
         }
 
         public Transform GetAnchor(int index)

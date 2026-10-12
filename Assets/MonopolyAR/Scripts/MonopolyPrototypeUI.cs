@@ -9,6 +9,7 @@ namespace MonopolyAR
         public MonopolyTurnManager game;
         public Camera boardCamera;
         public ARBoardPlacement arPlacement;
+        public PropertyCard3DController propertyCard;
         private Text placementText;
         public Button RollButton { get; private set; }
         public Button EndTurnButton { get; private set; }
@@ -16,6 +17,7 @@ namespace MonopolyAR
         public Text ResultsText { get; private set; }
         public Button[] PlayerCountButtons { get; private set; }
         public Button PlayButton { get; private set; }
+        public Button FallbackCloseCardButton { get; private set; }
         public bool IsStartMenuVisible => menuVisible;
         public int SelectedPlayerCount => selectedPlayerCount;
         public bool ShowTileNumbers { get; private set; } = true;
@@ -40,6 +42,7 @@ namespace MonopolyAR
         private void Start()
         {
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (!propertyCard) propertyCard = FindObjectOfType<PropertyCard3DController>(true);
             var canvasObject = new GameObject("PrototypeCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);
             var canvas = canvasObject.GetComponent<Canvas>();
@@ -64,8 +67,8 @@ namespace MonopolyAR
             Place(RollButton.GetComponent<RectTransform>(), 16, 208, 272, 48);
             EndTurnButton = Button("EndTurn", "Finalizar turno", panel, Vector2.zero, Vector2.one, buttonGray);
             Place(EndTurnButton.GetComponent<RectTransform>(), 16, 268, 272, 48);
-            RollButton.onClick.AddListener(() => { if (!arPlacement || arPlacement.BoardPlaced) game.TryRoll(); });
-            EndTurnButton.onClick.AddListener(() => { if (!arPlacement || arPlacement.BoardPlaced) game.TryEndTurn(); });
+            RollButton.onClick.AddListener(() => { if ((!propertyCard || !propertyCard.IsOpen) && (!arPlacement || arPlacement.BoardPlaced)) game.TryRoll(); });
+            EndTurnButton.onClick.AddListener(() => { if ((!propertyCard || !propertyCard.IsOpen) && (!arPlacement || arPlacement.BoardPlaced)) game.TryEndTurn(); });
             var toggleRect = Rect("ToggleNumbers", panel, Vector2.zero, Vector2.one);
             Place(toggleRect, 16, 328, 272, 32);
             NumbersToggle = toggleRect.gameObject.AddComponent<Toggle>();
@@ -107,6 +110,18 @@ namespace MonopolyAR
                 numbers[i].rectTransform.sizeDelta = new Vector2(38, 28);
             }
             BuildStartMenu(canvasObject.transform);
+            BuildFallbackCloseButton();
+        }
+
+        private void BuildFallbackCloseButton()
+        {
+            FallbackCloseCardButton = Button("FallbackCloseCard", "CERRAR TARJETA", safeRoot,
+                new Vector2(.34f, .035f), new Vector2(.66f, .115f), new Color(.94f, .58f, .16f, 1f));
+            FallbackCloseCardButton.onClick.AddListener(() =>
+            {
+                if (propertyCard) propertyCard.Close();
+            });
+            FallbackCloseCardButton.gameObject.SetActive(false);
         }
 
         private void BuildStartMenu(Transform canvasParent)
@@ -179,6 +194,7 @@ namespace MonopolyAR
                 if (placementText) placementText.gameObject.SetActive(false);
                 RollButton.interactable = false;
                 EndTurnButton.interactable = false;
+                if (FallbackCloseCardButton) FallbackCloseCardButton.gameObject.SetActive(false);
                 return;
             }
             safeRoot.gameObject.SetActive(true);
@@ -216,8 +232,14 @@ namespace MonopolyAR
             bool ready = game.Phase != TurnPhase.NotReady && game.Phase != TurnPhase.Error;
             StatusText.text = !placed ? "Jugador: Empresario\nCasilla: 00\nVuelta: 0\nDinero: $1500" : ready ? $"Jugador: {game.ActivePlayer.displayName}\nCasilla: {game.ActivePlayer.CurrentTile:00}\nVuelta: {game.ActivePlayer.LapsCompleted}\nDinero: ${game.ActivePlayer.Money}" : (game.Phase == TurnPhase.Error ? game.ErrorMessage : "Preparando partida...");
             ResultsText.text = game.dice.HasResult ? $"Dado 1: {game.dice.DieOne}\nDado 2: {game.dice.DieTwo}\nTotal: {game.dice.Sum}" : "Dado 1: -\nDado 2: -\nTotal: -";
-            RollButton.interactable = placed && game.CanRoll;
-            EndTurnButton.interactable = placed && game.CanEndTurn;
+            bool cardClosed = !propertyCard || !propertyCard.IsOpen;
+            if (FallbackCloseCardButton)
+            {
+                FallbackCloseCardButton.gameObject.SetActive(!cardClosed);
+                if (!cardClosed) FallbackCloseCardButton.transform.SetAsLastSibling();
+            }
+            RollButton.interactable = placed && game.CanRoll && cardClosed;
+            EndTurnButton.interactable = placed && game.CanEndTurn && cardClosed;
             if (placed && ready && boardCamera && ShowTileNumbers)
                 for (int i = 0; i < numbers.Length; i++)
                 {
