@@ -10,6 +10,7 @@ namespace MonopolyAR
         public Camera boardCamera;
         public ARBoardPlacement arPlacement;
         public PropertyCard3DController propertyCard;
+        public SpecialCard3DController specialCard;
         private Text placementText;
         public Button RollButton { get; private set; }
         public Button EndTurnButton { get; private set; }
@@ -18,6 +19,12 @@ namespace MonopolyAR
         public Button[] PlayerCountButtons { get; private set; }
         public Button PlayButton { get; private set; }
         public Button FallbackCloseCardButton { get; private set; }
+        public Button BuyPropertyButton { get; private set; }
+        public Button DeclinePropertyButton { get; private set; }
+        public Button RentAcknowledgeButton { get; private set; }
+        public Button JailPayButton { get; private set; }
+        public Button JailRollButton { get; private set; }
+        public Button JailCardButton { get; private set; }
         public bool IsStartMenuVisible => menuVisible;
         public int SelectedPlayerCount => selectedPlayerCount;
         public bool ShowTileNumbers { get; private set; } = true;
@@ -43,6 +50,8 @@ namespace MonopolyAR
         {
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (!propertyCard) propertyCard = FindObjectOfType<PropertyCard3DController>(true);
+            if (!specialCard) specialCard = FindObjectOfType<SpecialCard3DController>(true);
+            if (!specialCard) specialCard = new GameObject("SpecialCard3DController").AddComponent<SpecialCard3DController>();
             var canvasObject = new GameObject("PrototypeCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);
             var canvas = canvasObject.GetComponent<Canvas>();
@@ -67,8 +76,8 @@ namespace MonopolyAR
             Place(RollButton.GetComponent<RectTransform>(), 16, 208, 272, 48);
             EndTurnButton = Button("EndTurn", "Finalizar turno", panel, Vector2.zero, Vector2.one, buttonGray);
             Place(EndTurnButton.GetComponent<RectTransform>(), 16, 268, 272, 48);
-            RollButton.onClick.AddListener(() => { if ((!propertyCard || !propertyCard.IsOpen) && (!arPlacement || arPlacement.BoardPlaced)) game.TryRoll(); });
-            EndTurnButton.onClick.AddListener(() => { if ((!propertyCard || !propertyCard.IsOpen) && (!arPlacement || arPlacement.BoardPlaced)) game.TryEndTurn(); });
+            RollButton.onClick.AddListener(() => { if ((!propertyCard || !propertyCard.IsOpen) && (!specialCard || !specialCard.IsOpen) && (!arPlacement || arPlacement.BoardPlaced)) game.TryRoll(); });
+            EndTurnButton.onClick.AddListener(() => { if ((!propertyCard || !propertyCard.IsOpen) && (!specialCard || !specialCard.IsOpen) && (!arPlacement || arPlacement.BoardPlaced)) game.TryEndTurn(); });
             var toggleRect = Rect("ToggleNumbers", panel, Vector2.zero, Vector2.one);
             Place(toggleRect, 16, 328, 272, 32);
             NumbersToggle = toggleRect.gameObject.AddComponent<Toggle>();
@@ -111,6 +120,40 @@ namespace MonopolyAR
             }
             BuildStartMenu(canvasObject.transform);
             BuildFallbackCloseButton();
+            BuildPropertyDecisionButtons();
+            BuildRentAcknowledgeButton();
+            BuildJailButtons();
+        }
+
+        private void BuildRentAcknowledgeButton()
+        {
+            RentAcknowledgeButton = Button("RentAcknowledge", "ENTENDIDO", safeRoot,
+                new Vector2(.34f, .12f), new Vector2(.66f, .19f), new Color(.30f, .55f, .90f, 1f));
+            RentAcknowledgeButton.onClick.AddListener(() => { if (propertyCard && propertyCard.RentDecisionPending) propertyCard.AcknowledgeRent(); else if (specialCard) specialCard.Acknowledge(); });
+            RentAcknowledgeButton.gameObject.SetActive(false);
+        }
+
+        private void BuildJailButtons()
+        {
+            JailPayButton = Button("JailPay", "PAGAR $50", safeRoot, new Vector2(.06f, .12f), new Vector2(.30f, .19f), new Color(.82f, .62f, .20f, 1f));
+            JailRollButton = Button("JailRoll", "TIRAR DADOS", safeRoot, new Vector2(.33f, .12f), new Vector2(.67f, .19f), new Color(.30f, .55f, .90f, 1f));
+            JailCardButton = Button("JailCard", "USAR TARJETA", safeRoot, new Vector2(.70f, .12f), new Vector2(.94f, .19f), new Color(.55f, .42f, .72f, 1f));
+            JailPayButton.onClick.AddListener(() => { if (specialCard) specialCard.PayJailFine(); });
+            JailRollButton.onClick.AddListener(() => { if (specialCard) specialCard.AttemptJailRoll(); });
+            JailCardButton.onClick.AddListener(() => { if (specialCard) specialCard.UseJailCard(); });
+            JailPayButton.gameObject.SetActive(false); JailRollButton.gameObject.SetActive(false); JailCardButton.gameObject.SetActive(false);
+        }
+
+        private void BuildPropertyDecisionButtons()
+        {
+            BuyPropertyButton = Button("BuyProperty", "COMPRAR", safeRoot,
+                new Vector2(.08f, .12f), new Vector2(.46f, .19f), new Color(.25f, .78f, .35f, 1f));
+            DeclinePropertyButton = Button("DeclineProperty", "NO COMPRAR", safeRoot,
+                new Vector2(.54f, .12f), new Vector2(.92f, .19f), new Color(.85f, .35f, .30f, 1f));
+            BuyPropertyButton.onClick.AddListener(() => { if (propertyCard) propertyCard.PurchaseCurrent(); });
+            DeclinePropertyButton.onClick.AddListener(() => { if (propertyCard) propertyCard.DeclinePurchase(); });
+            BuyPropertyButton.gameObject.SetActive(false);
+            DeclinePropertyButton.gameObject.SetActive(false);
         }
 
         private void BuildFallbackCloseButton()
@@ -120,6 +163,7 @@ namespace MonopolyAR
             FallbackCloseCardButton.onClick.AddListener(() =>
             {
                 if (propertyCard) propertyCard.Close();
+                if (specialCard) specialCard.Close();
             });
             FallbackCloseCardButton.gameObject.SetActive(false);
         }
@@ -195,6 +239,12 @@ namespace MonopolyAR
                 RollButton.interactable = false;
                 EndTurnButton.interactable = false;
                 if (FallbackCloseCardButton) FallbackCloseCardButton.gameObject.SetActive(false);
+                if (BuyPropertyButton) BuyPropertyButton.gameObject.SetActive(false);
+                if (DeclinePropertyButton) DeclinePropertyButton.gameObject.SetActive(false);
+                if (RentAcknowledgeButton) RentAcknowledgeButton.gameObject.SetActive(false);
+                if (JailPayButton) JailPayButton.gameObject.SetActive(false);
+                if (JailRollButton) JailRollButton.gameObject.SetActive(false);
+                if (JailCardButton) JailCardButton.gameObject.SetActive(false);
                 return;
             }
             safeRoot.gameObject.SetActive(true);
@@ -231,13 +281,38 @@ namespace MonopolyAR
             numberLayer.gameObject.SetActive(placed && ShowTileNumbers);
             bool ready = game.Phase != TurnPhase.NotReady && game.Phase != TurnPhase.Error;
             StatusText.text = !placed ? "Jugador: Empresario\nCasilla: 00\nVuelta: 0\nDinero: $1500" : ready ? $"Jugador: {game.ActivePlayer.displayName}\nCasilla: {game.ActivePlayer.CurrentTile:00}\nVuelta: {game.ActivePlayer.LapsCompleted}\nDinero: ${game.ActivePlayer.Money}" : (game.Phase == TurnPhase.Error ? game.ErrorMessage : "Preparando partida...");
+            if (propertyCard && propertyCard.RentDecisionPending)
+                StatusText.text += "\n" + propertyCard.RentSummary + (propertyCard.RentOwner ? "\nPropietario: " + propertyCard.RentOwner.displayName : string.Empty);
             ResultsText.text = game.dice.HasResult ? $"Dado 1: {game.dice.DieOne}\nDado 2: {game.dice.DieTwo}\nTotal: {game.dice.Sum}" : "Dado 1: -\nDado 2: -\nTotal: -";
-            bool cardClosed = !propertyCard || !propertyCard.IsOpen;
+            bool cardClosed = (!propertyCard || !propertyCard.IsOpen) && (!specialCard || !specialCard.IsOpen);
             if (FallbackCloseCardButton)
             {
                 FallbackCloseCardButton.gameObject.SetActive(!cardClosed);
                 if (!cardClosed) FallbackCloseCardButton.transform.SetAsLastSibling();
             }
+            bool purchasePending = propertyCard && propertyCard.IsOpen && propertyCard.PurchaseDecisionPending;
+            if (BuyPropertyButton)
+            {
+                BuyPropertyButton.gameObject.SetActive(purchasePending);
+                BuyPropertyButton.interactable = propertyCard && propertyCard.CanPurchaseCurrent;
+                if (purchasePending) BuyPropertyButton.transform.SetAsLastSibling();
+            }
+            if (DeclinePropertyButton)
+            {
+                DeclinePropertyButton.gameObject.SetActive(purchasePending);
+                if (purchasePending) DeclinePropertyButton.transform.SetAsLastSibling();
+            }
+            bool rentPending = (propertyCard && propertyCard.IsOpen && propertyCard.RentDecisionPending) || (specialCard && specialCard.IsOpen);
+            if (RentAcknowledgeButton)
+            {
+                bool jailOptions = specialCard && specialCard.JailOptionsVisible;
+                RentAcknowledgeButton.gameObject.SetActive(rentPending && !jailOptions);
+                if (rentPending && !jailOptions) RentAcknowledgeButton.transform.SetAsLastSibling();
+            }
+            bool jailOptionsVisible = specialCard && specialCard.JailOptionsVisible;
+            if (JailPayButton) { JailPayButton.gameObject.SetActive(jailOptionsVisible); if (jailOptionsVisible) JailPayButton.transform.SetAsLastSibling(); }
+            if (JailRollButton) { JailRollButton.gameObject.SetActive(jailOptionsVisible); if (jailOptionsVisible) JailRollButton.transform.SetAsLastSibling(); }
+            if (JailCardButton) { JailCardButton.gameObject.SetActive(jailOptionsVisible); if (jailOptionsVisible) JailCardButton.transform.SetAsLastSibling(); }
             RollButton.interactable = placed && game.CanRoll && cardClosed;
             EndTurnButton.interactable = placed && game.CanEndTurn && cardClosed;
             if (placed && ready && boardCamera && ShowTileNumbers)

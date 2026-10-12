@@ -70,14 +70,133 @@ namespace MonopolyAR.Tests
         }
 
         [UnityTest]
-        public IEnumerator StationAndJailDoNotOpenPropertyCard()
+        public IEnumerator PurchaseRegistersOwnerAndPreventsDuplicatePurchase()
+        {
+            var buyer = game.players[0];
+            var other = game.players[1];
+            var data = board.GetSpaceData(1);
+            int before = buyer.Money;
+            card.Show(buyer, data);
+            yield return null;
+            Assert.IsTrue(card.PurchaseDecisionPending);
+            Assert.IsTrue(card.PurchaseCurrent());
+            Assert.AreEqual(buyer, board.GetOwner(data.index));
+            Assert.AreEqual(before - data.purchasePrice, buyer.Money);
+            card.Show(other, data);
+            yield return null;
+            Assert.IsFalse(card.PurchaseDecisionPending);
+            Assert.IsFalse(card.PurchaseCurrent());
+            Assert.AreEqual(before - data.purchasePrice, buyer.Money);
+        }
+
+        [UnityTest]
+        public IEnumerator DecliningPurchaseKeepsMoneyAndReleasesCard()
+        {
+            var buyer = game.players[0];
+            var data = board.GetSpaceData(3);
+            int before = buyer.Money;
+            card.Show(buyer, data);
+            yield return null;
+            card.DeclinePurchase();
+            Assert.AreEqual(before, buyer.Money);
+            Assert.IsNull(board.GetOwner(data.index));
+            Assert.IsFalse(card.IsOpen);
+        }
+
+        [UnityTest]
+        public IEnumerator ClassicPurchasePricesMatchTheFortyBoardSpaces()
+        {
+            int[] expected = { 0, 60, 0, 60, 0, 200, 100, 0, 100, 120,
+                0, 140, 150, 140, 160, 200, 180, 0, 180, 200,
+                0, 220, 0, 220, 240, 200, 260, 260, 150, 280,
+                0, 300, 300, 0, 320, 200, 0, 350, 0, 400 };
+            for (int i = 0; i < expected.Length; i++)
+                Assert.AreEqual(expected[i], board.GetSpaceData(i).purchasePrice, "Precio incorrecto en " + i);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator PurchaseDeductsExactPriceAndInsufficientFundsIsRejected()
+        {
+            var buyer = game.players[0];
+            var data = board.GetSpaceData(39);
+            int before = buyer.Money;
+            card.Show(buyer, data);
+            yield return null;
+            Assert.IsTrue(card.PurchaseCurrent());
+            Assert.AreEqual(before - 400, buyer.Money);
+
+            var poor = game.players[1];
+            poor.TrySpend(poor.Money);
+            card.Show(poor, board.GetSpaceData(37));
+            yield return null;
+            Assert.IsFalse(card.CanPurchaseCurrent);
+            Assert.IsFalse(card.PurchaseCurrent());
+            Assert.AreEqual(0, poor.Money);
+            Assert.IsNull(board.GetOwner(37));
+        }
+
+        [UnityTest]
+        public IEnumerator PropertyRentTransfersBaseRentOnce()
+        {
+            var owner = game.players[0];
+            var visitor = game.players[1];
+            Assert.IsTrue(board.TryPurchase(owner, 1, out _));
+            int ownerBefore = owner.Money;
+            int visitorBefore = visitor.Money;
+            Assert.IsTrue(board.TryCollectRent(visitor, 1, 7, out var rentOwner, out int rent, out int paid, out int debt, out _));
+            Assert.AreEqual(owner, rentOwner);
+            Assert.AreEqual(2, rent);
+            Assert.AreEqual(2, paid);
+            Assert.AreEqual(0, debt);
+            Assert.AreEqual(ownerBefore + 2, owner.Money);
+            Assert.AreEqual(visitorBefore - 2, visitor.Money);
+            Assert.IsFalse(board.TryCollectRent(visitor, 1, 7, out _, out _, out _, out _, out _));
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator StationsAndUtilitiesUseOwnedCountMultipliers()
+        {
+            var owner = game.players[0];
+            var visitor = game.players[1];
+            Assert.IsTrue(board.TryPurchase(owner, 5, out _));
+            Assert.IsTrue(board.TryPurchase(owner, 15, out _));
+            Assert.IsTrue(board.TryCollectRent(visitor, 5, 8, out _, out int stationRent, out _, out _, out _));
+            Assert.AreEqual(50, stationRent);
+            board.ClearRentResolutions();
+            Assert.IsTrue(board.TryPurchase(owner, 12, out _));
+            Assert.IsTrue(board.TryCollectRent(visitor, 12, 8, out _, out int utilityRent, out _, out _, out _));
+            Assert.AreEqual(32, utilityRent);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator InsufficientFundsCreatesDebtWithoutNegativeBalance()
+        {
+            var owner = game.players[0];
+            var visitor = game.players[1];
+            Assert.IsTrue(board.TryPurchase(owner, 39, out _));
+            visitor.TrySpend(visitor.Money);
+            Assert.IsTrue(board.TryCollectRent(visitor, 39, 0, out _, out int rent, out int paid, out int debt, out _));
+            Assert.AreEqual(50, rent);
+            Assert.AreEqual(0, paid);
+            Assert.AreEqual(50, debt);
+            Assert.AreEqual(0, visitor.Money);
+            Assert.AreEqual(50, board.GetOutstandingDebt(visitor));
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator StationAndJailPurchaseRulesOpenOnlyPurchasableSpaces()
         {
             card.Show(game.players[0], board.GetSpaceData(1));
             yield return null;
             Assert.IsTrue(card.IsOpen);
 
             card.Show(game.players[0], board.GetSpaceData(5));
-            Assert.IsFalse(card.IsOpen);
+            Assert.IsTrue(card.IsOpen);
+            card.Close();
             card.Show(game.players[0], board.GetSpaceData(10));
             Assert.IsFalse(card.IsOpen);
             yield return null;

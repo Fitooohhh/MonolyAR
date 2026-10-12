@@ -70,6 +70,7 @@ namespace MonopolyAR
             if (!board || !dice || roster == null || roster.Length < activePlayerCount || activePlayerCount < 2 || activePlayerCount > 4)
                 throw new System.InvalidOperationException("Configura entre dos y cuatro jugadores, tablero y dados.");
             board.Validate();
+            board.ClearPropertyOwners();
             foreach (var player in roster)
             {
                 if (!player) throw new System.InvalidOperationException("Falta un jugador.");
@@ -106,6 +107,7 @@ namespace MonopolyAR
             if (!CanEndTurn) return false;
             ActivePlayerIndex = (ActivePlayerIndex + 1) % players.Length;
             dice.ClearResult();
+            board.ClearRentResolutions();
             Phase = TurnPhase.AwaitRoll;
             return true;
         }

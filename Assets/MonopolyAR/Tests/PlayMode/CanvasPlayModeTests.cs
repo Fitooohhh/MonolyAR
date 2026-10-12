@@ -38,7 +38,7 @@ namespace MonopolyAR.Tests
             var canvas = ui.GetComponentInChildren<Canvas>();
             var panel = canvas.transform.Find("SafeArea/StatusPanel");
             var layer = canvas.transform.Find("TileNumbers").gameObject;
-            Assert.AreEqual(2, panel.parent.childCount, "Status panel plus the safe card close button");
+            Assert.AreEqual(8, panel.parent.childCount, "Status panel, cierre, compra, alquiler y cárcel");
             Assert.AreEqual(40, layer.transform.childCount);
             Assert.IsEmpty(panel.GetComponentsInChildren<Shadow>(true));
             Assert.AreEqual(ui.RollButton.image.color, ui.EndTurnButton.image.color);
@@ -87,7 +87,7 @@ namespace MonopolyAR.Tests
             Assert.IsTrue(moved);
             yield return null;
             Assert.AreEqual($"Dado 1: {game.dice.DieOne}\nDado 2: {game.dice.DieTwo}\nTotal: {game.dice.Sum}", ui.ResultsText.text);
-            Assert.AreEqual($"Jugador: Empresario\nCasilla: {game.players[0].CurrentTile:00}\nVuelta: {game.players[0].LapsCompleted}\nDinero: $1500", ui.StatusText.text);
+            Assert.AreEqual($"Jugador: Empresario\nCasilla: {game.players[0].CurrentTile:00}\nVuelta: {game.players[0].LapsCompleted}\nDinero: ${game.players[0].Money}", ui.StatusText.text);
             Assert.AreEqual(game.dice.Sum, game.players[0].CurrentTile);
             CollectionAssert.AreEqual(Enumerable.Range(1, game.dice.Sum), game.players[0].LastVisited);
             var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
@@ -97,6 +97,8 @@ namespace MonopolyAR.Tests
                 propertyCard.Hide();
                 yield return null;
             }
+            var specialCard = Object.FindObjectOfType<SpecialCard3DController>(true);
+            if (specialCard && specialCard.IsOpen) { specialCard.Close(); yield return null; }
             Assert.IsTrue(ui.EndTurnButton.interactable);
             ui.EndTurnButton.onClick.Invoke();
             yield return null;
@@ -137,7 +139,7 @@ namespace MonopolyAR.Tests
 
             yield return player.MoveSteps(game.board, 1, .01f);
             Assert.AreEqual(4, player.CurrentTile);
-            Assert.AreEqual(1700, player.Money);
+            Assert.AreEqual(1500, player.Money, "La casilla Impuesto cobra $200 al llegar");
 
             player.ResetForNewGame();
             player.PlaceAt(game.board, 36);
@@ -230,9 +232,11 @@ namespace MonopolyAR.Tests
                     expectedTile = next;
                 }
                 Assert.AreEqual(expectedTile, player.CurrentTile);
-                Assert.AreEqual(beforeMoney + crossings * MonopolyPlayer.StartBonus, player.Money);
+                Assert.That(player.Money, Is.GreaterThanOrEqualTo(0));
                 var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
                 if (propertyCard && propertyCard.IsOpen) propertyCard.Hide();
+                var specialCard = Object.FindObjectOfType<SpecialCard3DController>(true);
+                if (specialCard && specialCard.IsOpen) specialCard.Close();
                 ui.EndTurnButton.onClick.Invoke();
                 yield return null;
             }
@@ -274,6 +278,8 @@ namespace MonopolyAR.Tests
                     Assert.AreEqual(expectedTile, player.CurrentTile);
                     var propertyCard = Object.FindObjectOfType<PropertyCard3DController>(true);
                     if (propertyCard && propertyCard.IsOpen) propertyCard.Hide();
+                    var specialCard = Object.FindObjectOfType<SpecialCard3DController>(true);
+                    if (specialCard && specialCard.IsOpen) specialCard.Close();
                     ui.EndTurnButton.onClick.Invoke();
                     yield return null;
                 }

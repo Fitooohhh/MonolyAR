@@ -13,14 +13,78 @@ namespace MonopolyAR
         public Vector2 separation;
         [SerializeField] private int money = StartingMoney;
         [SerializeField] private int lapsCompleted;
+        [SerializeField] private Animator animator;
+        [SerializeField, Range(0f, 25f)] private float walkSwingDegrees = 12f;
         public int CurrentTile { get; private set; }
         public bool IsMoving { get; private set; }
+        public bool IsWalkingAnimationActive { get; private set; }
         public int Money => money;
         public int LapsCompleted => lapsCompleted;
+        public bool IsInJail { get; private set; }
+        public int JailAttempts { get; private set; }
         public event Action<MonopolyPlayer> PassedStart;
         public event Action<MonopolyPlayer, MonopolySpaceData> ArrivedAtSpace;
+        public bool TrySpend(int amount)
+        {
+            if (amount < 0 || money < amount) return false;
+            money -= amount;
+            return true;
+        }
+
+        public void AddMoney(int amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            money += amount;
+        }
         private readonly List<int> visited = new List<int>();
+        private readonly List<Transform> walkingLimbs = new List<Transform>();
+        private readonly List<Quaternion> walkingLimbRotations = new List<Quaternion>();
         public IReadOnlyList<int> LastVisited => visited;
+
+        private void Awake()
+        {
+            if (!animator) animator = GetComponent<Animator>();
+            CacheWalkingLimbs();
+        }
+
+        private void CacheWalkingLimbs()
+        {
+            walkingLimbs.Clear(); walkingLimbRotations.Clear();
+            foreach (Transform child in GetComponentsInChildren<Transform>(true))
+            {
+                if (child == transform) continue;
+                string n = child.name.ToLowerInvariant();
+                if (!n.Contains("manga") && !n.Contains("brazo") && !n.Contains("pierna") && !n.Contains("pantalon")) continue;
+                walkingLimbs.Add(child); walkingLimbRotations.Add(child.localRotation);
+            }
+        }
+
+        private void Update()
+        {
+            if (!IsWalkingAnimationActive) return;
+            float wave = Mathf.Sin(Time.time * 8f) * walkSwingDegrees;
+            for (int i = 0; i < walkingLimbs.Count; i++)
+            {
+                Transform limb = walkingLimbs[i];
+                if (!limb) continue;
+                bool right = limb.name.EndsWith("_R", StringComparison.OrdinalIgnoreCase) || limb.name.EndsWith("_r", StringComparison.OrdinalIgnoreCase);
+                float sign = right ? -1f : 1f;
+                limb.localRotation = walkingLimbRotations[i] * Quaternion.Euler(wave * sign, 0f, 0f);
+            }
+        }
+
+        private void SetWalkingAnimation(bool active)
+        {
+            IsWalkingAnimationActive = active;
+            if (animator && animator.runtimeAnimatorController)
+            {
+                animator.applyRootMotion = false;
+                animator.SetBool("Walking", active);
+            }
+            if (!active)
+                for (int i = 0; i < walkingLimbs.Count; i++)
+                    if (walkingLimbs[i]) walkingLimbs[i].localRotation = walkingLimbRotations[i];
+        }
 
         public void ResetForNewGame()
         {
@@ -28,7 +92,27 @@ namespace MonopolyAR
             money = StartingMoney;
             lapsCompleted = 0;
             visited.Clear();
+            IsInJail = false;
+            JailAttempts = 0;
         }
+
+        public void SendToJail(MonopolyBoard board)
+        {
+            if (!board) return;
+            SetWalkingAnimation(false);
+            IsInJail = true;
+            JailAttempts = 0;
+            CurrentTile = 10;
+            transform.position = board.PositionFor(10, separation);
+        }
+
+        public void ReleaseFromJail()
+        {
+            IsInJail = false;
+            JailAttempts = 0;
+        }
+
+        public void RegisterJailAttempt() { if (IsInJail) JailAttempts++; }
 
         public void PlaceAt(MonopolyBoard board, int index)
         {
@@ -48,6 +132,7 @@ namespace MonopolyAR
         {
             if (steps < 1 || secondsPerTile <= 0 || IsMoving) throw new System.ArgumentOutOfRangeException(nameof(steps));
             IsMoving = true;
+            SetWalkingAnimation(true);
             visited.Clear();
             try
             {
@@ -80,6 +165,7 @@ namespace MonopolyAR
             }
             finally
             {
+                SetWalkingAnimation(false);
                 IsMoving = false;
             }
         }

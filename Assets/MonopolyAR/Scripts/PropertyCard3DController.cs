@@ -17,6 +17,7 @@ namespace MonopolyAR
         [SerializeField] private Button closeButton;
         [SerializeField] private MonopolyBoard board;
         [SerializeField] private Camera targetCamera;
+        private SpecialCard3DController specialCard;
         [Header("Text")]
         [SerializeField] private Text groupText;
         [SerializeField] private Text propertyNameText;
@@ -57,7 +58,6 @@ namespace MonopolyAR
         private Quaternion savedDieOneLocalRotation;
         private Quaternion savedDieTwoLocalRotation;
         private bool diceStateSaved;
-        private bool diceAreAway;
         [SerializeField] private float boardClearance = 0.015f;
         [SerializeField] private float minimumWorldClearance = 0.006f;
 
@@ -70,9 +70,23 @@ namespace MonopolyAR
         private float resolvedWorldHeight;
         private readonly List<TextMeshPro> frontText3D = new List<TextMeshPro>();
         private Transform frontContent;
+        private bool specialPresentation;
+        private string specialTitle;
+        private string specialSymbol;
+        private string specialSummary;
+        private Color specialHeaderColor;
 
         public bool IsOpen { get; private set; }
         public MonopolySpaceData CurrentData { get; private set; }
+        public bool PurchaseDecisionPending { get; private set; }
+        public bool RentDecisionPending { get; private set; }
+        public int RentAmount { get; private set; }
+        public int RentPaid { get; private set; }
+        public int RentDebt { get; private set; }
+        public MonopolyPlayer RentOwner { get; private set; }
+        public string RentSummary => RentDecisionPending ? $"ALQUILER: ${RentAmount} | PAGADO: ${RentPaid} | DEUDA: ${RentDebt}" : string.Empty;
+        public MonopolyPlayer CurrentOwner => board ? board.GetOwner(CurrentData.index) : null;
+        public bool CanPurchaseCurrent => PurchaseDecisionPending && CurrentOwner == null && CurrentPlayer && CurrentPlayer.Money >= CurrentData.purchasePrice;
         public MonopolyPlayer CurrentPlayer { get; private set; }
         public float ModelScale => modelScale;
         public float BoardClearance => boardClearance;
@@ -124,19 +138,33 @@ namespace MonopolyAR
         private void UpdateFrontContent(MonopolySpaceData data)
         {
             if (frontText3D.Count == 0) BuildFrontContent();
-            string[] values = {
-                data.colorGroup == PropertyColorGroup.None ? "PROPIEDAD" : data.colorGroup.ToString().ToUpperInvariant(),
-                data.displayName.ToUpperInvariant(),
-                "PRECIO $" + data.purchasePrice,
-                "ALQUILER BASE   $" + data.baseRent,
-                "1 CASA   $" + data.rent1House,
-                "2 CASAS   $" + data.rent2Houses,
-                "3 CASAS   $" + data.rent3Houses,
-                "4 CASAS   $" + data.rent4Houses,
-                "HOTEL   $" + data.rentHotel,
-                "PRECIO CASA   $" + data.housePrice,
-                "PRECIO HOTEL   $" + data.hotelPrice
-            };
+            string[] values;
+            if (specialPresentation)
+            {
+                values = new string[11];
+                values[0] = specialTitle.ToUpperInvariant();
+                values[1] = specialSymbol;
+                values[2] = data.displayName.ToUpperInvariant();
+                string[] bodyLines = (specialSummary ?? string.Empty).Replace("\r", string.Empty).Split('\n');
+                for (int i = 0; i < 8; i++)
+                    values[3 + i] = i < bodyLines.Length ? bodyLines[i].ToUpperInvariant() : string.Empty;
+            }
+            else
+            {
+                values = new[] {
+                    RentDecisionPending ? $"ALQUILER ${RentAmount} · {PlayerName(RentOwner).ToUpperInvariant()}" : (data.colorGroup == PropertyColorGroup.None ? "PROPIEDAD" : data.colorGroup.ToString().ToUpperInvariant()) + (CurrentOwner ? " · DUEÑO: " + CurrentOwner.displayName.ToUpperInvariant() : ""),
+                    data.displayName.ToUpperInvariant(),
+                    "PRECIO $" + data.purchasePrice,
+                    "ALQUILER BASE   $" + data.baseRent,
+                    "1 CASA   $" + data.rent1House,
+                    "2 CASAS   $" + data.rent2Houses,
+                    "3 CASAS   $" + data.rent3Houses,
+                    "4 CASAS   $" + data.rent4Houses,
+                    "HOTEL   $" + data.rentHotel,
+                    "PRECIO CASA   $" + data.housePrice,
+                    "PRECIO HOTEL   $" + data.hotelPrice
+                };
+            }
             for (int i = 0; i < frontText3D.Count; i++) frontText3D[i].text = values[i];
             frontContent.gameObject.SetActive(true);
         }
@@ -147,6 +175,7 @@ namespace MonopolyAR
             if (!board) board = GetComponentInParent<MonopolyBoard>() ?? FindObjectOfType<MonopolyBoard>();
             if (!targetCamera) targetCamera = Camera.main;
             turnManager = FindObjectOfType<MonopolyTurnManager>();
+            specialCard = FindObjectOfType<SpecialCard3DController>(true);
             SubscribeToPlayers();
             CloseInternal("inicialización", false);
         }
@@ -164,17 +193,67 @@ namespace MonopolyAR
 
         private void OnArrivedAtSpace(MonopolyPlayer player, MonopolySpaceData data)
         {
-            if (data.type == SpaceType.Property)
+            if (data.type == SpaceType.Property || data.type == SpaceType.Station || data.type == SpaceType.Utility)
             {
-                Debug.Log($"[PropertyCard3D] ArrivedAtSpace: jugador={PlayerName(player)}, índice={data.index}, tipo=Property.", this);
+                ResolveRentForArrival(player, data);
+                Debug.Log($"[PropertyCard3D] ArrivedAtSpace: jugador={PlayerName(player)}, índice={data.index}, tipo={data.type}.", this);
                 Show(player, data);
             }
-            else CloseInternal($"casilla {data.index} no es Property", false);
+            else
+            {
+                CloseInternal($"casilla {data.index} no es comprable", false);
+                specialCard = specialCard ? specialCard : FindObjectOfType<SpecialCard3DController>(true);
+                if (specialCard && data.type != SpaceType.Start) specialCard.Show(player, data);
+            }
+        }
+
+        private void ResolveRentForArrival(MonopolyPlayer player, MonopolySpaceData data)
+        {
+            RentDecisionPending = false;
+            RentAmount = RentPaid = RentDebt = 0;
+            RentOwner = null;
+            Debug.Log($"[PropertyCard3D] Resolviendo alquiler: casilla={data.index}, dueño={(board && board.GetOwner(data.index) ? board.GetOwner(data.index).displayName : "ninguno")}, dinero={player.Money}, rentaBase={data.baseRent}.", this);
+            if (!board || !turnManager || board.GetOwner(data.index) == null || board.GetOwner(data.index) == player) return;
+            if (board.TryCollectRent(player, data.index, turnManager.dice ? turnManager.dice.Sum : 0,
+                out MonopolyPlayer owner, out int rent, out int paid, out int debt, out string reason))
+            {
+                RentOwner = owner; RentAmount = rent; RentPaid = paid; RentDebt = debt; RentDecisionPending = true;
+                Debug.Log($"[PropertyCard3D] Alquiler resuelto: propiedad={data.displayName}, propietario={PlayerName(owner)}, importe=${rent}, pagado=${paid}, deuda=${debt}. {reason}", this);
+            }
         }
 
         public void Show(MonopolyPlayer player, MonopolySpaceData data)
         {
-            if (data.type != SpaceType.Property) { CloseInternal($"casilla {data.index} no es Property", false); return; }
+            if (data.type != SpaceType.Property && data.type != SpaceType.Station && data.type != SpaceType.Utility) { CloseInternal($"casilla {data.index} no es comprable", false); return; }
+            specialPresentation = false;
+            PurchaseDecisionPending = board && board.GetOwner(data.index) == null;
+            ShowInternal(player, data);
+        }
+
+        public bool ShowSpecial(MonopolyPlayer player, MonopolySpaceData data, string title, string symbol, string summary, Color headerColor)
+        {
+            specialPresentation = true;
+            specialTitle = title ?? string.Empty;
+            specialSymbol = symbol ?? string.Empty;
+            specialSummary = summary ?? string.Empty;
+            specialHeaderColor = headerColor;
+            PurchaseDecisionPending = false;
+            RentDecisionPending = false;
+            RentAmount = RentPaid = RentDebt = 0;
+            RentOwner = null;
+            bool shown = ShowInternal(player, data);
+            if (!shown) specialPresentation = false;
+            return shown;
+        }
+
+        public void UpdateSpecialSummary(string summary)
+        {
+            specialSummary = summary ?? string.Empty;
+            if (specialPresentation && IsOpen) UpdateFrontContent(CurrentData);
+        }
+
+        private bool ShowInternal(MonopolyPlayer player, MonopolySpaceData data)
+        {
             Debug.Log($"[PropertyCard3D] Apertura solicitada: jugador={PlayerName(player)}, propiedad={data.index} ({data.displayName}).", this);
             if (!board) board = GetComponentInParent<MonopolyBoard>() ?? FindObjectOfType<MonopolyBoard>();
             if (!targetCamera) targetCamera = Camera.main;
@@ -182,13 +261,16 @@ namespace MonopolyAR
             if (!board || !targetCamera || !modelRoot || !worldCanvas || !colorHeaderRenderer)
             {
                 FailPresentation($"referencias incompletas: board={!!board}, camera={!!targetCamera}, model={!!modelRoot}, canvas={!!worldCanvas}, header={!!colorHeaderRenderer}");
-                return;
+                return false;
             }
             CurrentPlayer = player;
             CurrentData = data;
+            if (!specialPresentation)
+                PurchaseDecisionPending = board.GetOwner(data.index) == null && !RentDecisionPending;
             UpdateTexts(data);
             UpdateFrontContent(data);
-            ApplyHeaderColor(data.colorGroup);
+            if (specialPresentation) ApplyHeaderColor(specialHeaderColor);
+            else ApplyHeaderColor(data.colorGroup);
             // Bounds are unavailable while the imported model is inactive.
             // Activate it before placement so the base can be aligned to the
             // real board plane instead of intersecting the board.
@@ -224,7 +306,7 @@ namespace MonopolyAR
             if (!ValidatePresentation(out string diagnostics))
             {
                 FailPresentation(diagnostics);
-                return;
+                return false;
             }
             LastPresentationValid = true;
             LastPresentationDiagnostics = diagnostics;
@@ -235,6 +317,37 @@ namespace MonopolyAR
             SaveDiceStateBeforeMoving();
             diceMoveRoutine = StartCoroutine(MoveDiceAside());
             animationRoutine = StartCoroutine(AnimateOpen());
+            return true;
+        }
+
+        public void AcknowledgeRent()
+        {
+            if (!RentDecisionPending) return;
+            Debug.Log($"[PropertyCard3D] Alquiler entendido: propiedad={CurrentData.displayName}, pagado=${RentPaid}, deuda=${RentDebt}.", this);
+            CloseInternal("ENTENDIDO", true);
+        }
+
+        public bool PurchaseCurrent()
+        {
+            if (!PurchaseDecisionPending || !CurrentPlayer || !board) return false;
+            if (!board.TryPurchase(CurrentPlayer, CurrentData.index, out string reason))
+            {
+                Debug.Log($"[PropertyCard3D] Compra rechazada: {reason}", this);
+                return false;
+            }
+            PurchaseDecisionPending = false;
+            UpdateFrontContent(CurrentData);
+            Debug.Log($"[PropertyCard3D] Compra realizada: {CurrentPlayer.displayName} -> {CurrentData.displayName} por ${CurrentData.purchasePrice}.", this);
+            CloseInternal("COMPRAR", true);
+            return true;
+        }
+
+        public void DeclinePurchase()
+        {
+            if (!PurchaseDecisionPending) return;
+            PurchaseDecisionPending = false;
+            Debug.Log($"[PropertyCard3D] Compra rechazada por el jugador: {CurrentData.displayName}.", this);
+            CloseInternal("NO COMPRAR", true);
         }
 
         private IEnumerator MoveDiceAside()
@@ -264,7 +377,6 @@ namespace MonopolyAR
             }
             dice.dieOneVisual.position = targets[0];
             dice.dieTwoVisual.position = targets[1];
-            diceAreAway = true;
             Debug.Log("[PropertyCard3D] Dados en posición de descanso; resultados y rotaciones conservados.", this);
             diceMoveRoutine = null;
         }
@@ -282,7 +394,6 @@ namespace MonopolyAR
             savedDieOneLocalRotation = dice.dieOneVisual.localRotation;
             savedDieTwoLocalRotation = dice.dieTwoVisual.localRotation;
             diceStateSaved = true;
-            diceAreAway = false;
             Debug.Log($"[PropertyCard3D] Posiciones originales de dados guardadas: d1={savedDieOneLocalPosition:F3}, d2={savedDieTwoLocalPosition:F3}.", this);
         }
 
@@ -319,7 +430,6 @@ namespace MonopolyAR
             one.localRotation = savedDieOneLocalRotation;
             two.localRotation = savedDieTwoLocalRotation;
             diceStateSaved = false;
-            diceAreAway = false;
             savedDice = null;
             diceRestoreRoutine = null;
             Debug.Log("[PropertyCard3D] Dados restaurados a sus posiciones originales.", this);
@@ -372,7 +482,11 @@ namespace MonopolyAR
         {
             bool wasOpen = IsOpen;
             IsOpen = false;
+            PurchaseDecisionPending = false;
+            RentDecisionPending = false;
             CurrentPlayer = null;
+            specialPresentation = false;
+            specialTitle = specialSymbol = specialSummary = string.Empty;
             RestoreDiceIfNeeded();
             if (animationRoutine != null) { StopCoroutine(animationRoutine); animationRoutine = null; }
             transform.localScale = Vector3.one;
@@ -778,6 +892,12 @@ namespace MonopolyAR
         {
             if (!colorHeaderRenderer) return;
             colorHeaderRenderer.material.color = HeaderColor(group);
+        }
+
+        public void ApplyHeaderColor(Color color)
+        {
+            if (!colorHeaderRenderer) return;
+            colorHeaderRenderer.material.color = color;
         }
 
         public static Color HeaderColor(PropertyColorGroup group)

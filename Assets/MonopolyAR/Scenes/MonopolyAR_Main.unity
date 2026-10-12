@@ -3402,8 +3402,8 @@ MonoBehaviour:
     displayName: Propiedad 01
     type: 1
     colorGroup: 1
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 60
+    baseRent: 2
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3428,8 +3428,8 @@ MonoBehaviour:
     displayName: Propiedad 03
     type: 1
     colorGroup: 1
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 60
+    baseRent: 4
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3454,7 +3454,7 @@ MonoBehaviour:
     displayName: "Estaci\xF3n 1"
     type: 4
     colorGroup: 0
-    purchasePrice: 0
+    purchasePrice: 200
     baseRent: 0
     rent1House: 0
     rent2Houses: 0
@@ -3467,8 +3467,8 @@ MonoBehaviour:
     displayName: Propiedad 06
     type: 1
     colorGroup: 2
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 100
+    baseRent: 6
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3493,8 +3493,8 @@ MonoBehaviour:
     displayName: Propiedad 08
     type: 1
     colorGroup: 2
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 100
+    baseRent: 6
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3506,8 +3506,8 @@ MonoBehaviour:
     displayName: Propiedad 09
     type: 1
     colorGroup: 2
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 120
+    baseRent: 8
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3532,8 +3532,8 @@ MonoBehaviour:
     displayName: Propiedad 11
     type: 1
     colorGroup: 3
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 140
+    baseRent: 10
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3545,7 +3545,7 @@ MonoBehaviour:
     displayName: Electricidad
     type: 7
     colorGroup: 0
-    purchasePrice: 0
+    purchasePrice: 150
     baseRent: 0
     rent1House: 0
     rent2Houses: 0
@@ -3558,8 +3558,8 @@ MonoBehaviour:
     displayName: Propiedad 13
     type: 1
     colorGroup: 3
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 140
+    baseRent: 10
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3571,8 +3571,8 @@ MonoBehaviour:
     displayName: Propiedad 14
     type: 1
     colorGroup: 3
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 160
+    baseRent: 12
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3584,7 +3584,7 @@ MonoBehaviour:
     displayName: "Estaci\xF3n 2"
     type: 4
     colorGroup: 0
-    purchasePrice: 0
+    purchasePrice: 200
     baseRent: 0
     rent1House: 0
     rent2Houses: 0
@@ -3597,8 +3597,8 @@ MonoBehaviour:
     displayName: Propiedad 16
     type: 1
     colorGroup: 4
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 180
+    baseRent: 14
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3623,8 +3623,8 @@ MonoBehaviour:
     displayName: Propiedad 18
     type: 1
     colorGroup: 4
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 180
+    baseRent: 14
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3636,8 +3636,8 @@ MonoBehaviour:
     displayName: Propiedad 19
     type: 1
     colorGroup: 4
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 200
+    baseRent: 16
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3662,8 +3662,8 @@ MonoBehaviour:
     displayName: Propiedad 21
     type: 1
     colorGroup: 5
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 220
+    baseRent: 18
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3688,8 +3688,8 @@ MonoBehaviour:
     displayName: Propiedad 23
     type: 1
     colorGroup: 5
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 220
+    baseRent: 18
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3701,8 +3701,8 @@ MonoBehaviour:
     displayName: Propiedad 24
     type: 1
     colorGroup: 5
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 240
+    baseRent: 20
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3714,7 +3714,7 @@ MonoBehaviour:
     displayName: "Estaci\xF3n 3"
     type: 4
     colorGroup: 0
-    purchasePrice: 0
+    purchasePrice: 200
     baseRent: 0
     rent1House: 0
     rent2Houses: 0
@@ -3727,8 +3727,8 @@ MonoBehaviour:
     displayName: Propiedad 26
     type: 1
     colorGroup: 6
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 260
+    baseRent: 22
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3740,8 +3740,8 @@ MonoBehaviour:
     displayName: Propiedad 27
     type: 1
     colorGroup: 6
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 260
+    baseRent: 22
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3753,7 +3753,7 @@ MonoBehaviour:
     displayName: Agua
     type: 7
     colorGroup: 0
-    purchasePrice: 0
+    purchasePrice: 150
     baseRent: 0
     rent1House: 0
     rent2Houses: 0
@@ -3766,8 +3766,8 @@ MonoBehaviour:
     displayName: Propiedad 29
     type: 1
     colorGroup: 6
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 280
+    baseRent: 24
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3792,8 +3792,8 @@ MonoBehaviour:
     displayName: Propiedad 31
     type: 1
     colorGroup: 7
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 300
+    baseRent: 26
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3805,8 +3805,8 @@ MonoBehaviour:
     displayName: Propiedad 32
     type: 1
     colorGroup: 7
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 300
+    baseRent: 26
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3831,8 +3831,8 @@ MonoBehaviour:
     displayName: Propiedad 34
     type: 1
     colorGroup: 7
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 320
+    baseRent: 28
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3844,7 +3844,7 @@ MonoBehaviour:
     displayName: "Estaci\xF3n 4"
     type: 4
     colorGroup: 0
-    purchasePrice: 0
+    purchasePrice: 200
     baseRent: 0
     rent1House: 0
     rent2Houses: 0
@@ -3870,8 +3870,8 @@ MonoBehaviour:
     displayName: Propiedad 37
     type: 1
     colorGroup: 8
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 350
+    baseRent: 35
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0
@@ -3896,8 +3896,8 @@ MonoBehaviour:
     displayName: Propiedad 39
     type: 1
     colorGroup: 8
-    purchasePrice: 0
-    baseRent: 0
+    purchasePrice: 400
+    baseRent: 50
     rent1House: 0
     rent2Houses: 0
     rent3Houses: 0

@@ -112,7 +112,62 @@ namespace MonopolyAR
             Set(spaces, 37, "Propiedad 37", SpaceType.Property, PropertyColorGroup.DarkBlue);
             Set(spaces, 38, "Impuesto", SpaceType.Tax);
             Set(spaces, 39, "Propiedad 39", SpaceType.Property, PropertyColorGroup.DarkBlue);
+            ApplyClassicPurchasePrices(spaces);
+            ApplyClassicBaseRents(spaces);
             return spaces;
+        }
+
+        public static int DefaultPurchasePrice(int index)
+        {
+            switch (index)
+            {
+                case 1: case 3: return 60;
+                case 5: case 15: case 25: case 35: return 200;
+                case 6: case 8: return 100;
+                case 9: return 120;
+                case 11: case 13: return 140;
+                case 12: case 28: return 150;
+                case 14: return 160;
+                case 16: case 18: return 180;
+                case 19: return 200;
+                case 21: case 23: return 220;
+                case 24: return 240;
+                case 26: case 27: return 260;
+                case 29: return 280;
+                case 31: case 32: return 300;
+                case 34: return 320;
+                case 37: return 350;
+                case 39: return 400;
+                default: return 0;
+            }
+        }
+
+        private static void ApplyClassicPurchasePrices(MonopolySpaceData[] spaces)
+        {
+            for (int i = 0; i < spaces.Length; i++)
+                spaces[i].purchasePrice = DefaultPurchasePrice(i);
+        }
+
+        public static int DefaultBaseRent(int index)
+        {
+            switch (index)
+            {
+                case 1: return 2; case 3: return 4;
+                case 6: case 8: return 6; case 9: return 8;
+                case 11: case 13: return 10; case 14: return 12;
+                case 16: case 18: return 14; case 19: return 16;
+                case 21: case 23: return 18; case 24: return 20;
+                case 26: case 27: return 22; case 29: return 24;
+                case 31: case 32: return 26; case 34: return 28;
+                case 37: return 35; case 39: return 50;
+                default: return 0;
+            }
+        }
+
+        private static void ApplyClassicBaseRents(MonopolySpaceData[] spaces)
+        {
+            for (int i = 0; i < spaces.Length; i++)
+                spaces[i].baseRent = DefaultBaseRent(i);
         }
 
         private static void Set(MonopolySpaceData[] spaces, int index, string name, SpaceType type,

@@ -106,6 +106,12 @@ namespace MonopolyAR.Tests
                 propertyCard.Hide();
                 yield return null;
             }
+            var specialCard = Object.FindObjectOfType<SpecialCard3DController>(true);
+            if (specialCard && specialCard.IsOpen)
+            {
+                specialCard.Close();
+                yield return null;
+            }
             Assert.IsTrue(ui.EndTurnButton.interactable);
             Assert.IsFalse(ui.RollButton.interactable);
             Assert.IsFalse(game.TryRoll());
